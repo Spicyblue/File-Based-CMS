@@ -1,11 +1,33 @@
 # Import the necessary modules 
 import os
+import yaml
+import bcrypt
 from functools import wraps
 from flask import Flask, render_template,  send_from_directory, redirect, url_for, flash, request, session #type: ignore
 from markdown import markdown #type: ignore
 
 app = Flask(__name__)
 app.secret_key = 'secret'
+
+def valid_credentials(username, password):
+    credentials = load_user_credentials()
+
+    if username in credentials:
+        stored_password = credentials[username].encode('utf-8')
+        return bcrypt.checkpw(password.encode('utf-8'), stored_password)
+    else:
+        return False
+
+def load_user_credentials():
+    filename = 'users.yml'
+    root_dir = os.path.dirname(__file__)
+    if app.config['TESTING']:
+        credentials_path = os.path.join(root_dir, 'tests', filename)
+    else:
+        credentials_path = os.path.join(root_dir, "cms", filename)
+
+    with open(credentials_path, 'r') as file:
+        return yaml.safe_load(file)
 
 def user_signed_in():
     return 'username' in session
@@ -136,7 +158,7 @@ def signin():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    if username == "admin" and password == "secret":
+    if valid_credentials(username, password):
         session['username'] = username
         flash("Welcome!")
         return redirect(url_for('index'))
