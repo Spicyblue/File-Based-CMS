@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>Content Management </title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Sans">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/app.css') }}">
+  </head>
+  <body>
+    {% for message in get_flashed_messages() %}
+      <p class="message">{{ message }}</p>
+    {% endfor %}
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>
